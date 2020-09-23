@@ -1,0 +1,117 @@
+prefix :    <http://example.org/bpn#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+prefix foaf: <http://xmlns.com/foaf/0.1/> 
+
+MAPPING 
+FROM CSV {  # Disregard this error highlighting in Stardog Studio
+}
+
+TO {
+
+# Classes
+    foaf:Person a rdfs:Class .
+    :Field a rdfs:Class .
+    :Zip_Code a rdfs:Class .
+    :State a rdfs:Class .
+    :City a rdfs:Class.
+    :Organization a rdfs:Class .
+    :Address a rdfs:Class .
+    :Street a rdfs:Class .
+
+?Person a foaf:Person ;
+        rdfs:label ?full_name ;
+        foaf:firstName ?first_name ;
+       foaf:lastName ?last_name ;   
+        :employed_as ?Employee ; 
+        :email ?email ;
+        :phone ?phone ;
+        :residence ?residence ;
+        :income ?salary ;
+        :field ?Field . 
+
+?Field a :Field .
+
+?residence :address ?Address .
+
+?Address a :Address ;
+         :city ?City ;
+        :zip_code ?Zip_Code ;
+         :street_address ?Street ; 
+        :state ?State ;
+         :full_address ?full_address ;
+         rdfs:label ?full_address .
+
+?Street a :Street ;
+        :in ?Zip_Code ;
+        :in ?City ;
+        :in ?State ;   # This should be done by transitive property reasoning... 
+        rdfs:label ?street .
+
+?Zip_Code a :Zip_Code ;
+          :in ?City ;
+          :in ?State ;  # This should be done by transitive property reasoning... 
+          rdfs:label ?zip_code .
+
+?City a :City ;
+      :in ?State ;
+      rdfs:label ?city .
+
+?State a :State ;
+       rdfs:label ?state .
+
+?Street rdfs:subPropertyOf ?Address .
+?City rdfs:subPropertyOf ?Address .
+?State rdfs:subPropertyOf ?Address .
+?Zip_Code rdfs:subPropertyOf ?Address .
+
+?Employee :employer ?Company ; 
+          :in ?position ;
+          :salary ?salary .
+          #rdfs:label ?employee .
+
+?Company a :Organization ;
+          :employs ?Employee ;
+          :has_position ?position ;
+         :employee_in ?Zip_Code ;
+          :employee_in ?City ;
+         :employee_in ?State ;    # This should be done by transitive property reasoning... 
+          rdfs:label ?employer .
+
+?position :field ?Field .
+}
+
+WHERE {
+
+# IRIs 
+    BIND(TEMPLATE("http://example.org/bpn#person-{id}" ) AS ?Person)
+    BIND(TEMPLATE("http://example.org/bpn#employee-{id}") AS ?Employee)
+    BIND(TEMPLATE("http://example.org/bpn#field-{field}" ) AS ?Field)    
+    BIND(TEMPLATE("http://example.org/bpn#company-{employer}" ) AS ?Company)
+    BIND(TEMPLATE("http://example.org/bpn#zip_code-{zip_code}" ) AS ?Zip_Code)
+    BIND(TEMPLATE("http://example.org/bpn#city-{city}" ) AS ?City)
+    BIND(TEMPLATE("http://example.org/bpn#street-{street}" ) AS ?Street)    
+    BIND(TEMPLATE("http://example.org/bpn#address-{id}" ) AS ?Address)
+    
+    BIND(TEMPLATE("http://example.org/bpn#state-{state}" ) AS ?State)  # note the evil trailing space in the column header - I deleted it manually from CSV
+
+
+# *** NOTE: Disregard error highlighting for parentheses after CONCAT and BNODE in Stardog Studio
+
+# Strings
+    BIND(CONCAT(?street,", ",?city,", ",?state," ",?zip_code) AS ?full_address)      
+    BIND(CONCAT(?first_name, " ", ?last_name ) AS ?full_name)
+
+# Float
+        BIND(xsd:float(?income) AS ?salary)
+
+# Bnodes
+    BIND(BNODE(CONCAT("position-",?id )) AS ?position)  
+    BIND(BNODE(CONCAT("residence-",?id)) AS ?residence)    
+}
+
+##### Instructions ######
+
+# With this .sms file and the corresponding .csv in a directory, open Linux terminal in that dir and then: 
+
+# export PATH="$PATH:/opt/stardog/bin"
+# stardog-admin virtual import --format sms2 customers fake-customer-mapping.sms fake-customers.csv

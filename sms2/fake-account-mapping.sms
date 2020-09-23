@@ -1,0 +1,59 @@
+prefix :    <http://example.org/bpn#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+prefix foaf: <http://xmlns.com/foaf/0.1/> 
+
+MAPPING 
+FROM CSV {  # Disregard this error highlighting in Stardog Studio
+}
+
+TO {
+
+# Classes
+    foaf:Person a rdfs:Class .
+    :APR_Rate a rdfs:Class.
+    :Customer a rdfs:Class .
+    :Employee a rdfs:Class .
+    :Account a rdfs:Class .
+
+?Person a foaf:Person ; # Joining on this 
+        :customer_id ?Customer . 
+        
+?Customer a :Customer ;
+          :sameAs ?Employee ;
+          :has_account ?Account .
+
+?Employee a :Employee . # Joining on this
+
+?APR_Rate a :APR_Rate . # Optional for convenient grouping of accounts with same APR rate
+
+?Account a :Account ;
+         rdfs:label ?account_id ;
+         :account_number ?account_id ;
+         :has_balance ?balance_float ;
+         :apr ?apr_float ;
+         :apr_rate ?APR_Rate ; # Optional for convenient grouping of accounts with same APR rate
+         :start_date ?start_date ;
+         :credit_limit ?credit_limit_float .
+}
+
+WHERE {
+
+# IRIs 
+    BIND(TEMPLATE("http://example.org/bpn#person-{customer_id}" ) AS ?Person) # joining on this 
+    BIND(TEMPLATE("http://example.org/bpn#customer-{customer_id}") AS ?Customer) # linking sameAs ?Employee
+    BIND(TEMPLATE("http://example.org/bpn#employee-{customer_id}") AS ?Employee) # joining on this
+    BIND(TEMPLATE("http://example.org/bpn#account-{account_id}") AS ?Account)
+    BIND(TEMPLATE("http://example.org/bpn#apr_rate_{apr}") AS ?APR_Rate)
+
+# Float
+        BIND(xsd:float(?apr) AS ?apr_float)
+        BIND(xsd:float(?credit_limit) AS ?credit_limit_float)
+        BIND(xsd:float(?balance) AS ?balance_float)                
+}
+
+##### Instructions ######
+
+# With this .sms file and the corresponding .csv in a directory, open Linux terminal in that dir and then: 
+
+# export PATH="$PATH:/opt/stardog/bin"
+# stardog-admin virtual import --format sms2 customers fake-account-mapping.sms fake-accounts.csv
