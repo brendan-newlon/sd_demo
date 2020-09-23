@@ -1,0 +1,50 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix schema: <http://schema.org/> .
+
+@prefix emp: <http://example.com/emp/> .
+
+emp:{id} a schema:Person ;   # can I assign two classes here using a comma? With no prefix (default prefix)?
+         schema:givenName "{first_name}" ;
+         schema:familyName "{last_name}" ;
+         schema:telephone "{phone}" ;
+         schema:email "{email}" ;
+         
+         emp:income "{income}"^^xsd:float ;
+         
+         schema:streetAddress "{street}" ;  # this part as string
+         schema:City emp:{city} ;
+         schema:State emp:{state} ;
+         schema:postalCode emp:{zip_code} ;
+         
+         emp:field emp:{field} ;
+         emp:employer emp:{employer} ;
+         
+         emp:fullName "{first_name} {last_name}" ;
+         rdfs:label "{first_name} {last_name}" .
+
+# Other classes?
+emp:{employer} a schema:Organization ;
+                rdfs:label "{employer}" .
+
+emp:{field} a emp:Field ;
+            rdfs:label "{field}" .
+
+#emp:{street} a schema:streetAddress .
+
+emp:{zip_code} a schema:postalCode ;
+               rdfs:label "Zip Code: {zip_code}" .
+emp:{city} a schema:City ;
+           rdfs:label "City: {city}" .
+emp:{state} a schema:State ;
+            rdfs:label "State: {state}" .
+
+
+
+############## INSTRUCTIONS ##############
+
+# With these two files in a directory, open terminal in that dir and then: 
+
+# export PATH="$PATH:/opt/stardog/bin"   
+# stardog-admin virtual import customers fake-customer-mapping.ttl fake-customers.csv

@@ -1,0 +1,31 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix schema: <http://schema.org/> .
+
+@prefix emp: <http://example.com/emp/> .
+@prefix acct: <http://example.com/acct/> .
+
+
+emp:{customer_id} a schema:Person ;
+                  acct:account acct:{account_id} .
+
+acct:{account_id} a schema:LoanOrCredit ;  
+         acct:apr_tier acct:{apr} ;  # APR here as a tier for convenient grouping
+    # Properties on node
+         acct:balance "{balance}"^^xsd:float ;
+         acct:credit_limit "{credit_limit}"^^xsd:float ;
+         schema:annualPercentageRate "{apr}"^^xsd:float ;  # APR here as a float property
+         schema:startDate "{start_date}"^^xsd:date ;
+                  rdfs:label "Acct# {account_id}" . 
+
+# Other Classes
+acct:{apr} a acct:APR_Tier ;
+           rdfs:label "APR: 0{apr}" .
+
+
+############## INSTRUCTIONS ##############
+
+# With these two files in a directory, open terminal in that dir and then: 
+
+# export PATH="$PATH:/opt/stardog/bin"   
+# stardog-admin virtual import customers fake-account-mapping.ttl fake-accounts.csv
