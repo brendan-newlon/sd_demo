@@ -1,0 +1,36 @@
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+prefix xsd: <http://www.w3.org/2001/XMLSchema#> 
+prefix emp: <http://example.com/emp/> 
+prefix acct: <http://example.com/acct/> 
+prefix schema: <http://schema.org/>
+
+SELECT ?Name_id  
+(COUNT(distinct ?account) AS ?accounts)  # Number of accounts
+#(SUM(?balance) AS ?total_balance)
+(SUM(?credit_limit) AS ?total_credit_limit)        # limit ratio to income? - lending risk?
+(xsd:decimal(?income) AS ?Income )
+(ROUND( ?total_credit_limit / ?income , 3 ) AS ?limit_to_income_ratio)  # this does not seem to set the datatype, and I can't filter on the value of this variable...
+WHERE {
+    ?person a schema:Person ;
+            acct:account ?account ;
+            emp:income ?income ;
+            emp:fullName ?name .
+
+    ?account acct:balance ?balance ;
+             acct:credit_limit ?credit_limit .
+    
+    BIND(REPLACE(STR(?person),"http://example.com/emp/","") AS ?id) # simplify id by removing the iri prefix
+        BIND(CONCAT(?name , " (",?id,")") AS ?Name_id) # simplify id by removing the iri prefix
+}
+GROUP BY ?Name_id ?income 
+HAVING (SUM(?credit_limit) / ?income > .5)
+ORDER BY DESC(?limit_to_income_ratio)
+limit 10
+
+#############################
+# Question: Are we taking risk by over-extending credit to customers? (industry best practice is to set credit limit at about 10%)
+#
+# SOLUTION: The query above asks, "Who has one or more accounts with a combined credit limit greater than half of their annual income?"
+#
+#       Eg. Cam Pigram can borrow almost 95% of their annual income. Their current balance is almost 45% of income.

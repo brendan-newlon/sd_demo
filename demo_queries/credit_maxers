@@ -1,0 +1,21 @@
+prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+prefix xsd: <http://www.w3.org/2001/XMLSchema#> 
+prefix emp: <http://example.com/emp/> 
+prefix acct: <http://example.com/acct/> 
+prefix schema: <http://schema.org/>
+
+SELECT ?person ?name (COUNT(distinct ?account) AS ?accounts) (SUM(?balance) AS ?total_balance) (SUM(?credit_limit) AS ?total_limit) (xsd:float(?total_limit) - xsd:float(?total_balance) AS ?credit_remaining)
+WHERE {
+    ?person a schema:Person ;
+            acct:account ?account ;
+            emp:fullName ?name .
+        
+    ?account acct:balance ?balance ;
+             acct:credit_limit ?credit_limit .
+    
+    BIND(?total_limit - ?total_balance AS ?credit_remaining)
+}
+GROUP BY ?person ?name
+ORDER BY ?credit_remaining
+limit 10

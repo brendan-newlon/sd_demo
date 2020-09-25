@@ -1,0 +1,14 @@
+prefix xsd: <http://www.w3.org/2001/XMLSchema#> 
+prefix emp: <http://example.com/emp/> 
+prefix acct: <http://example.com/acct/> 
+prefix schema: <http://schema.org/>
+
+SELECT ?predicate (COUNT(?predicate) as ?predicateCount)
+WHERE {
+    ?subject ?predicate ?object .
+}
+GROUP BY ?predicate
+ORDER BY DESC(?predicateCount)
+
+#############################
+# QUESTION: What are the relationship types and their counts?

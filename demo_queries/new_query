@@ -1,0 +1,21 @@
+prefix xsd: <http://www.w3.org/2001/XMLSchema#> 
+prefix emp: <http://example.com/emp/> 
+prefix acct: <http://example.com/acct/> 
+prefix schema: <http://schema.org/>
+SELECT  
+
+
+WHERE {
+
+
+
+}
+
+limit 10
+
+#############################
+# Question: 
+#
+# SOLUTION: The query above asks, "?"
+#
+#       Eg. 

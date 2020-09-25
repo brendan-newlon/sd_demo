@@ -1,0 +1,17 @@
+prefix xsd: <http://www.w3.org/2001/XMLSchema#> 
+prefix emp: <http://example.com/emp/> 
+prefix acct: <http://example.com/acct/> 
+prefix schema: <http://schema.org/>
+SELECT  
+SELECT ?class (COUNT(?subject) as ?classCount)
+WHERE {
+    ?subject ?predicate ?object.
+    ?subject rdf:type ?class .
+}
+GROUP BY ?class
+ORDER BY DESC(?classCount)
+
+#############################
+# Question: What are the classes and their counts?
+#
+

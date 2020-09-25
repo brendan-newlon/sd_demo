@@ -1,0 +1,27 @@
+prefix xsd: <http://www.w3.org/2001/XMLSchema#> 
+prefix emp: <http://example.com/emp/> 
+prefix acct: <http://example.com/acct/> 
+prefix schema: <http://schema.org/>
+
+SELECT ?Name_id
+(COUNT(distinct ?account) AS ?accounts)  # Number of accounts
+(xsd:decimal(SUM(?balance) ) AS ?total_balance)           # balance ratio to income? - risky borrowing?
+(xsd:decimal(?income) AS ?Income )
+(ROUND ( ?total_balance / ?income , 3 ) AS ?balance_to_income_ratio)
+
+WHERE {
+    ?person a schema:Person ;
+            acct:account ?account ;
+            emp:income ?income ;
+            emp:fullName ?name .
+        
+    ?account acct:balance ?balance ;
+             acct:credit_limit ?credit_limit .
+    
+    #BIND(?total_limit - ?total_balance AS ?credit_remaining) # how much more could they borrow?
+    BIND(REPLACE(STR(?person),"http://example.com/emp/","") AS ?id) # simplify id by removing the iri prefix
+        BIND(CONCAT(?name , " (",?id,")") AS ?Name_id) # simplify id by removing the iri prefix
+}
+GROUP BY ?Name_id ?income
+ORDER BY DESC(?balance_to_income_ratio)
+limit 10

@@ -1,0 +1,12 @@
+prefix xsd: <http://www.w3.org/2001/XMLSchema#> 
+prefix emp: <http://example.com/emp/> 
+prefix acct: <http://example.com/acct/> 
+prefix schema: <http://schema.org/>
+DESCRIBE ?cam ?account
+WHERE {
+    ?cam a schema:Person ;
+         schema:givenName "Cam" ;         
+         schema:familyName "Pigram" ;
+         acct:account ?account .   
+   }
+limit 10

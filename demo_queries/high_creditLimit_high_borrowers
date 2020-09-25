@@ -1,0 +1,35 @@
+prefix xsd: <http://www.w3.org/2001/XMLSchema#> 
+prefix emp: <http://example.com/emp/> 
+prefix acct: <http://example.com/acct/> 
+prefix schema: <http://schema.org/>
+SELECT  ?Name_id
+(COUNT(distinct ?account) AS ?accounts)                         # Number of accounts
+(xsd:decimal(?income) AS ?Income )                              # Reformatting for familiar 2 decimial places
+(xsd:decimal(SUM(?balance)) AS ?total_balance)                  # Total balance due on all accounts
+(xsd:decimal(SUM(?credit_limit) ) AS ?total_credit_limit)       # limit ratio to income? - lending risk?
+(ROUND(?total_credit_limit / ?income , 3) AS ?limit_to_income_ratio)  
+(ROUND(?total_balance / ?income , 3) AS ?balance_to_income_ratio)
+WHERE {
+    ?person a schema:Person ;
+            acct:account ?account ;
+            emp:income ?income ;
+            emp:fullName ?name ;
+            schema:City ?city .
+    ?account acct:balance ?balance ;
+             acct:credit_limit ?credit_limit .
+    BIND(REPLACE(STR(?person),"http://example.com/emp/","") AS ?id) # simplify id by removing the iri prefix
+    BIND(CONCAT(?name , " (",?id,")") AS ?Name_id) # simplify by combining name and id
+}
+GROUP BY ?Name_id ?income 
+HAVING (SUM(?credit_limit)/?income > .33 && (SUM(?balance)/?income > .1)
+)
+ORDER BY DESC(?balance_to_income_ratio)
+limit 10
+
+#############################
+# Question: Are we taking risk by over-extending credit to customers? (industry best practice is to set credit limit at about 10%)
+#
+# Customers having credit_limit greater than 33% of income AND combined balances greater than 10% of income
+# SOLUTION: The query above asks, "Who has one or more accounts with a combined credit limit greater than half of their annual income?"
+#
+#       Eg. Cam Pigram can borrow almost 95% of their annual income. Their current balance is almost 45% of income.
