@@ -1,0 +1,28 @@
+prefix xsd: <http://www.w3.org/2001/XMLSchema#> 
+prefix emp: <http://example.com/emp/> 
+prefix acct: <http://example.com/acct/> 
+prefix schema: <http://schema.org/>
+SELECT  
+?Employer (avg(?apr) as ?employerwide_avg_apr) 
+
+WHERE {
+?person a schema:Person ;
+        acct:account ?account ;
+        emp:employer ?employer ;
+        schema:City ?city ;
+        schema:State ?state .
+?account schema:annualPercentageRate ?apr ;
+         acct:balance ?balance ;
+         acct:credit_limit ?credit_limit .
+BIND(REPLACE(STR(?employer),"http://example.com/emp/","") AS ?Employer) # simplify by removing the iri prefix
+}
+GROUP BY ?Employer
+ORDER BY ?employerwide_avg_apr
+limit 10
+
+#############################
+# Question: 
+#
+# SOLUTION: The query above asks, "?"
+#
+#       Eg. 
