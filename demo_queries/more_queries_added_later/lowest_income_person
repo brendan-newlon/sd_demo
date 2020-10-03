@@ -1,0 +1,42 @@
+prefix xsd: <http://www.w3.org/2001/XMLSchema#> 
+prefix emp: <http://example.com/emp/> 
+prefix acct: <http://example.com/acct/> 
+prefix schema: <http://schema.org/>
+
+# DESCRIBE 
+# ?Lilllie ?Clement
+# {
+# ?Lilllie a schema:Person ;
+#          schema:givenName "Lilllie" ;
+#           emp:income ?income .
+# optional {  ?Lilllie acct:account ?account }
+# # }
+
+
+# # # select *
+# # DESCRIBE  
+# # ?Clement
+# # where
+# # {
+# ?Clement a schema:Person ;
+#          schema:givenName "Clement" ;
+#          schema:familyName "Danelutti"
+#         #   emp:income ?income .
+# optional {  ?Clement acct:account ?account }
+# }
+
+DESCRIBE ?person
+{
+    ?person a schema:Person ;
+            emp:income ?income
+}
+# ORDER BY DESC(?income)
+ORDER BY ?income
+
+limit 3
+
+
+#############################
+# Question: How's the pay for people in the whole dataset?
+#
+# SOLUTION: The query above asks, "In our data, how do incomes for people differ?"

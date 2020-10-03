@@ -1,0 +1,40 @@
+prefix emp: <http://example.com/emp/> 
+prefix schema: <http://schema.org/>
+
+INSERT { ?person emp:postalCode_invalid  ?incompleteZip }
+WHERE 
+  {
+    ?person schema:postalCode ?zip_code .
+    #?zip_code a schema:postalCode
+    bind(xsd:integer(replace(str(?zip_code),"http://example.com/emp/","")) as ?zip)
+    bind(xsd:string(?zip) as ?incompleteZip)
+    filter (!regex(str(?zip), "^[0-9]{5}$" ))  # bad zips - anything other than 5 digits
+  } 
+
+  ; # followed by a new query!
+DELETE { 
+    ?zip_code a schema:postalCode .
+    # ?zip_coee rdfs:label ?zipLabel .
+    ?person schema:postalCode  ?zip_code .
+    ?person a schema:postalCode .
+    ?person rdfs:label ?label .
+  }
+WHERE 
+  {
+    ?person schema:postalCode ?zip_code .
+    bind(xsd:integer(replace(str(?zip_code),"http://example.com/emp/","")) as ?zip)
+    filter (!regex(str(?zip), "^[0-9]{5}$" )) # bad zip
+  }
+  ;
+
+# Fix people being labeled as zip codes:
+DELETE { ?person rdfs:label ?label }
+WHERE 
+  { ?person rdfs:label ?label . }    
+  ;
+
+INSERT { ?person rdfs:label ?fullName }
+WHERE 
+  { ?person emp:fullName ?fullName .
+  #  filter( NOT EXISTS { ?person rdfs:label ?label } )
+    }    
