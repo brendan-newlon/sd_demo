@@ -1,0 +1,32 @@
+prefix xsd: <http://www.w3.org/2001/XMLSchema#> 
+prefix emp: <http://example.com/emp/> 
+prefix acct: <http://example.com/acct/> 
+prefix schema: <http://schema.org/>
+SELECT  
+?Field2 (avg(?income) as ?field_avg_income) 
+
+WHERE {
+?person a schema:Person ;
+     #   acct:account ?account ;
+        emp:income ?income ;
+      #  emp:employer ?employer ;
+       # schema:City ?city ;
+        emp:field ?field ;
+        #schema:State ?state .
+#?account schema:annualPercentageRate ?apr ;
+       #  acct:balance ?balance ;
+       #  acct:credit_limit ?credit_limit .
+BIND(REPLACE(STR(?field),"http://example.com/emp/","") AS ?Field) 
+BIND(REPLACE(STR(?Field),"%20"," ") AS ?Field2)
+
+}
+GROUP BY ?Field2
+ORDER BY desc(?field_avg_income)
+limit 100
+
+#############################
+# Question: 
+#
+# SOLUTION: The query above asks, "?"
+#
+#       Eg. 

@@ -1,0 +1,12 @@
+# prefix xsd: <http://www.w3.org/2001/XMLSchema#> 
+# prefix emp: <http://example.com/emp/> 
+# prefix acct: <http://example.com/acct/> 
+# prefix schema: <http://schema.org/>
+
+DESCRIBE ?double
+{
+    ?double a ?thing1 ; 
+            a ?thing2 .
+    FILTER (?thing1 != ?thing2)
+}
+limit 50

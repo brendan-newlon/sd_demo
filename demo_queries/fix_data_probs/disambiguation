@@ -1,0 +1,34 @@
+prefix schema: <http://schema.org/>
+INSERT { 
+  ?person ?p1  ?full_disambiguation .
+  ?full_disambiguation a ?class .
+  }
+WHERE { SELECT distinct ?person ?p1 ?full_disambiguation ?class
+        WHERE { # Something ("double") is labeled with two different things as rdf:type
+        ?double a ?thing1 ; 
+                a ?thing2 .
+        FILTER (?thing1 != ?thing2) 
+                ?person a schema:Person ;
+                        ?p1 ?double. # A person has some relationship to that "double"
+        BIND(REPLACE(str(?p1), "[^/]+$", "" ) as ?prefix) # Separate the relationship from it's prefix
+        BIND(REPLACE(str(?p1), ?prefix, "") as ?keep) # what the relationship says it should be
+        BIND(REPLACE(str(?double), "[^/]+$", "" ) as ?pref) # Separate the double from its prefix
+        BIND(REPLACE(str(?double), ?pref, "") as ?keep_double) # what the relationship says it should be
+        BIND(IRI(concat (?pref,concat(?keep_double,"_(",?keep,")")) ) as ?full_disambiguation)
+        BIND (IRI(?thing1) as ?class)
+        }    
+        HAVING (?p1 = ?thing1)
+} ;
+DELETE { 
+  ?anyNode ?anyRel ?double .
+  ?double ?anyRel2 ?anyNode .
+  ?double a ?thing1 .
+  ?double a ?thing2 .
+  }
+WHERE { # Something ("double") is labeled with two different things as rdf:type
+        ?double a ?thing1 ; 
+                a ?thing2 .
+        FILTER (?thing1 != ?thing2)
+        OPTIONAL{ ?anyNode ?anyRel ?double .}    # All the relationships in and out of "double"
+        OPTIONAL{ ?double ?anyRel2 ?anyNode .}
+}    

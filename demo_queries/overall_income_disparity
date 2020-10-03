@@ -1,0 +1,46 @@
+prefix xsd: <http://www.w3.org/2001/XMLSchema#> 
+prefix emp: <http://example.com/emp/> 
+prefix acct: <http://example.com/acct/> 
+prefix schema: <http://schema.org/>
+SELECT
+?Name_id ?income (?incdiff * -1 as ?diff_from_avg) 
+((?max_income - ?income) * -1 as ?diff_from_max) ?num_sd  (?above_below as ?above_or_below)
+{
+    ?person emp:fullName ?name .
+    BIND(REPLACE(STR(?person),"http://example.com/emp/","") AS ?id) # simplify id by removing the iri prefix
+        BIND(CONCAT(?name , " (",?id,")") AS ?Name_id) # simplify by combining name and id
+    {
+    SELECT ?person ?income ?num_sd ?above_below ?avg_income ?sd ?max_income
+    (ROUND(?avg_income - ?income ,2) as ?incdiff)
+    (if ( ?income > ?avg_income, "above", if ( ?income < ?avg_income, "below", "avg" )) AS ?above_below )
+    (ROUND(abs(?incdiff) / ?sd ,2) AS ?num_sd)
+    {
+    ?person a schema:Person ;
+                emp:income ?income .   
+        {
+        SELECT (ROUND(sqrt(SUM(?diffs) / ?num_persons),2) AS ?sd) ?avg_income ?max_income
+            {
+            SELECT 
+            ?person ?income ?avg_income ?num_persons ?max_income
+                    (?income - ?avg_income AS ?diff_from_avg)
+                    (?diff_from_avg * ?diff_from_avg AS ?diffs) 
+                {
+                    ?person a schema:Person ;
+                                emp:income ?income .
+                    {
+                        SELECT   
+                        (count(?person) AS ?num_persons) # how many persons?
+                        (ROUND(AVG(?income),2) AS ?avg_income) # their average
+                        (ROUND(MAX(?income),2) AS ?max_income) # max income
+                        WHERE {
+                            ?person a schema:Person ;
+                                    emp:income ?income .
+                        }}}}
+        GROUP BY ?num_persons ?avg_income ?max_income
+        }}}}
+ORDER BY ?income
+
+#############################
+# Question: How's the pay for people in the whole dataset?
+#
+# SOLUTION: The query above asks, "In our data, how do incomes for people differ?"
