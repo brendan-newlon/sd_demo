@@ -1,3 +1,0 @@
-export PATH="$PATH:/opt/stardog/bin" 
-stardog icv validate customers icv_no_doubles.ttl
-
